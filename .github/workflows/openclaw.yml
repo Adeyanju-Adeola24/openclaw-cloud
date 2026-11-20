@@ -1,0 +1,111 @@
+name: OpenClaw 24/7
+
+# Free, always-on OpenClaw gateway on GitHub-hosted runners.
+# Public repos get UNLIMITED free Actions minutes.
+#
+# How this stays alive:
+#   - each job runs up to 6h (GitHub hard limit)
+#   - a new job starts every 4h (cron), overlapping the previous one
+#   - when an old job dies, the next one is already serving
+#
+# Required repository secrets (Settings > Secrets > Actions):
+#   DEEPSEEK_API_KEY, NVIDIA_API_KEY, OPENCODE_API_KEY   (add only what you use)
+# Optional:
+#   CLOUDFLARE_TUNNEL_TOKEN  -> stable public URL (free Cloudflare account)
+#   otherwise a random *.trycloudflare.com URL is printed in the job log
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: openclaw-247
+  cancel-in-progress: false
+
+jobs:
+  gateway:
+    name: OpenClaw gateway
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+      CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore OpenClaw state (sessions, agent DB, skills)
+        uses: actions/cache@v4
+        with:
+          path: ~/.openclaw
+          key: openclaw-state-${{ github.run_number }}
+          restore-keys: |
+            openclaw-state-
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Prepare system (swap, cloudflared)
+        run: |
+          set -e
+          sudo fallocate -l 4G /swapfile || true
+          sudo chmod 600 /swapfile || true
+          sudo mkswap /swapfile >/dev/null 2>&1 || true
+          sudo swapon /swapfile 2>/dev/null || true
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            -o /usr/local/bin/cloudflared
+          sudo chmod +x /usr/local/bin/cloudflared
+          node -v
+          free -h | head -2
+
+      - name: Install OpenClaw
+        run: |
+          set -e
+          npm install -g openclaw@2026.11.5
+          openclaw --version
+
+      - name: Start gateway + public tunnel
+        run: |
+          set -e
+          chmod +x scripts/start-gateway.sh
+          bash scripts/start-gateway.sh
+
+      - name: Report status
+        run: |
+          {
+            echo "### OpenClaw online"
+            echo ""
+            echo "- Gateway health: $(curl -s -o /dev/null -w '%{http_code}' --max-time 15 http://127.0.0.1:18789/health)"
+            echo "- Public URL: $(cat ~/.openclaw/public-url.txt 2>/dev/null || echo 'see logs')"
+            echo "- Dashboard token: (see OPENCLAW token in the job log)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # GitHub disables scheduled workflows in public repos after 60 days with no
+      # repository activity. These commits keep the repo (and the schedule) alive.
+      - name: Heartbeat commit
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name  "openclaw-heartbeat"
+          git config user.email "openclaw-heartbeat@users.noreply.github.com"
+          echo "last seen: $(date -u +%FT%TZ)" > heartbeat.txt
+          git add heartbeat.txt
+          git commit -m "heartbeat $(date -u +%FT%TZ)" || true
+          git push || true
+
+      - name: Keep the job alive
+        run: |
+          set -e
+          tail -f /dev/null

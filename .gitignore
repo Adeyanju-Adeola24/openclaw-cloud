@@ -2,5 +2,4 @@ node_modules/
 *.log
 .env
 openclaw.json
-public-url.txt
 gateway-token

@@ -103,7 +103,7 @@ jobs:
           if [ -f "$HOME/.openclaw/public-url.txt" ]; then
             cp "$HOME/.openclaw/public-url.txt" ./public-url.txt
           fi
-          git add heartbeat.txt public-url.txt 2>/dev/null || true
+          git add -f heartbeat.txt public-url.txt 2>/dev/null || true
           git commit -m "heartbeat $(date -u +%FT%TZ)" || true
           git push || true
 

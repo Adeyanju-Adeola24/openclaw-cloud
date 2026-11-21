@@ -106,12 +106,18 @@ jobs:
           git config user.email "openclaw-heartbeat@users.noreply.github.com"
           echo "last seen: $(date -u +%FT%TZ)" > heartbeat.txt
           if [ -f "$HOME/.openclaw/public-url.txt" ]; then
+            URL="$(cat "$HOME/.openclaw/public-url.txt")"
             cp "$HOME/.openclaw/public-url.txt" ./public-url.txt
+            # Keep a history of EVERY tunnel URL. When one runner dies its URL dies
+            # with it, but the older overlapping runner is still alive - the PC-side
+            # tracker probes every URL here and falls back to a live one.
+            touch public-urls.txt
+            grep -qxF "$URL" public-urls.txt || echo "$URL" >> public-urls.txt
           fi
           if [ -f "$HOME/.openclaw/verify-result.txt" ]; then
             cp "$HOME/.openclaw/verify-result.txt" ./verify-result.txt
           fi
-          git add -f heartbeat.txt public-url.txt verify-result.txt 2>/dev/null || true
+          git add -f heartbeat.txt public-url.txt public-urls.txt verify-result.txt 2>/dev/null || true
           git commit -m "heartbeat $(date -u +%FT%TZ)" || true
           git pull --rebase origin main || true
           git push || true

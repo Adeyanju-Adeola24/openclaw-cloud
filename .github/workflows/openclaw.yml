@@ -79,6 +79,11 @@ jobs:
           chmod +x scripts/start-gateway.sh
           bash scripts/start-gateway.sh
 
+      - name: Verify from the server
+        run: |
+          chmod +x scripts/verify.sh
+          bash scripts/verify.sh
+
       - name: Report status
         run: |
           {
@@ -103,7 +108,10 @@ jobs:
           if [ -f "$HOME/.openclaw/public-url.txt" ]; then
             cp "$HOME/.openclaw/public-url.txt" ./public-url.txt
           fi
-          git add -f heartbeat.txt public-url.txt 2>/dev/null || true
+          if [ -f "$HOME/.openclaw/verify-result.txt" ]; then
+            cp "$HOME/.openclaw/verify-result.txt" ./verify-result.txt
+          fi
+          git add -f heartbeat.txt public-url.txt verify-result.txt 2>/dev/null || true
           git commit -m "heartbeat $(date -u +%FT%TZ)" || true
           git pull --rebase origin main || true
           git push || true

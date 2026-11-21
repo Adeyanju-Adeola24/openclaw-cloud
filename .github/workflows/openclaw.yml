@@ -24,10 +24,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: openclaw-247
-  cancel-in-progress: false
-
 jobs:
   gateway:
     name: OpenClaw gateway
@@ -38,6 +34,8 @@ jobs:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
       CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+      CLOUDFLARE_PUBLIC_URL: ${{ secrets.CLOUDFLARE_PUBLIC_URL }}
+      OPENCLAW_DASHBOARD_TOKEN: ${{ secrets.OPENCLAW_DASHBOARD_TOKEN }}
 
     steps:
       - name: Checkout
@@ -93,15 +91,19 @@ jobs:
 
       # GitHub disables scheduled workflows in public repos after 60 days with no
       # repository activity. These commits keep the repo (and the schedule) alive.
-      - name: Heartbeat commit
-        if: github.event_name == 'schedule'
+      # The public URL is published here so it can be read while this job runs.
+      # The dashboard TOKEN is never committed - it lives in repo secrets.
+      - name: Publish status + heartbeat
         continue-on-error: true
         run: |
           cd "$GITHUB_WORKSPACE"
           git config user.name  "openclaw-heartbeat"
           git config user.email "openclaw-heartbeat@users.noreply.github.com"
           echo "last seen: $(date -u +%FT%TZ)" > heartbeat.txt
-          git add heartbeat.txt
+          if [ -f "$HOME/.openclaw/public-url.txt" ]; then
+            cp "$HOME/.openclaw/public-url.txt" ./public-url.txt
+          fi
+          git add heartbeat.txt public-url.txt 2>/dev/null || true
           git commit -m "heartbeat $(date -u +%FT%TZ)" || true
           git push || true
 

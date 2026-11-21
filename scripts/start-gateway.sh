@@ -10,8 +10,14 @@ export NODE_OPTIONS="--max-old-space-size=1024"
 
 echo "== writing gateway config =="
 TOKEN_FILE="$OC/gateway-token"
-if [ ! -f "$TOKEN_FILE" ]; then
-  head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$TOKEN_FILE"
+# A stable token comes from the repo secret so it survives across jobs and is
+# never written into the public repo. Fall back to a generated one.
+if [ -n "${OPENCLAW_DASHBOARD_TOKEN:-}" ]; then
+  printf '%s' "$OPENCLAW_DASHBOARD_TOKEN" > "$TOKEN_FILE"
+else
+  if [ ! -f "$TOKEN_FILE" ]; then
+    head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$TOKEN_FILE"
+  fi
 fi
 export OPENCLAW_TOKEN_VALUE
 OPENCLAW_TOKEN_VALUE="$(cat "$TOKEN_FILE")"

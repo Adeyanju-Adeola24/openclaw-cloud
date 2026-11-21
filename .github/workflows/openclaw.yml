@@ -105,6 +105,7 @@ jobs:
           fi
           git add -f heartbeat.txt public-url.txt 2>/dev/null || true
           git commit -m "heartbeat $(date -u +%FT%TZ)" || true
+          git pull --rebase origin main || true
           git push || true
 
       - name: Keep the job alive

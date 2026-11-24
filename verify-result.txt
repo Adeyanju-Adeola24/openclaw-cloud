@@ -1,5 +1,5 @@
 OpenClaw cloud verification
-time: 2026-11-23T19:39:11Z
+time: 2026-11-24T04:30:31Z
 
 local /health      : HTTP 200  {"ok":true,"status":"live"}
 local dashboard    : HTTP 200  39218 bytes
@@ -10,13 +10,13 @@ websocket probe    :
   OK    /ws
 
 processes:
-  pid=2359 rss=1556764KB up=00:13 openclaw-gateway 
-  pid=2521 rss=115896KB up=00:06 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
-  pid=2486 rss=95484KB up=00:09 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
-  pid=2503 rss=88824KB up=00:08 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/infra/sqlite-readonly-location.worker.js
-  pid=2552 rss=40044KB up=00:03 cloudflared tunnel
-  pid=2591 rss=3700KB up=00:00 bash /home/runner/.openclaw/keepalive.sh
+  pid=2613 rss=1531332KB up=00:16 openclaw-gateway 
+  pid=2696 rss=113024KB up=00:07 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
+  pid=2661 rss=96112KB up=00:11 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
+  pid=2678 rss=88508KB up=00:10 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/infra/sqlite-readonly-location.worker.js
+  pid=2715 rss=39944KB up=00:06 cloudflared tunnel
+  pid=2799 rss=3756KB up=00:00 bash /home/runner/.openclaw/keepalive.sh
 
 memory:
                total        used        free      shared  buff/cache   available
-Mem:            15Gi       2.6Gi        11Gi        48Mi       2.2Gi        12Gi
+Mem:            15Gi       2.6Gi        11Gi        45Mi       2.2Gi        13Gi

@@ -75,6 +75,17 @@ if [[ ! -f "$STATE_DIR/openclaw.json" ]]; then
   "$OPENCLAW_BIN" onboard "${onboard_args[@]}"
 fi
 
+if [[ -n "${NVIDIA_API_KEY:-}" ]]; then
+  # Prefer the Codespaces-injected secret over a potentially stale saved profile.
+  "$OPENCLAW_BIN" config set models.providers.nvidia.apiKey '"NVIDIA_API_KEY"' --strict-json >/dev/null || true
+
+  # The auth store is only mutable while the Gateway is offline. Remove the
+  # stale profile so the current Codespaces secret is the credential in use.
+  if ! curl -fsS --max-time 5 http://127.0.0.1:18789/health >/dev/null 2>&1; then
+    "$OPENCLAW_BIN" models auth logout nvidia:default --yes --agent main >/dev/null 2>&1 || true
+  fi
+fi
+
 "$OPENCLAW_BIN" config set tools.web.search.enabled true --strict-json >/dev/null || true
 "$OPENCLAW_BIN" config set tools.web.search.provider '"duckduckgo"' --strict-json >/dev/null || true
 "$OPENCLAW_BIN" config set tools.web.search.maxResults 5 --strict-json >/dev/null || true

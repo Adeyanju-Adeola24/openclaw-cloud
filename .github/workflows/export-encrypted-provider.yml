@@ -1,0 +1,43 @@
+name: Temporary encrypted provider export
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    name: Encrypt provider credential
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Encrypt provider credential
+        shell: bash
+        env:
+          PROVIDER_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$PROVIDER_KEY"
+          cat > /tmp/openclaw_provider_pub.pem <<'EOF'
+          -----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjs8Eyk3x+guF6PBmB3sn
+          pdpHU+Tz0PyE0YRUPsllfSc8n1rJbM77VPQSChlV2MqdWD1B7sMqj89YXCLutUeI
+          I1zYGX1tmjsF11UXc2uLQN608+TtBcgvQDt9bkrBA3qqAV7Tppnd+jdD32bog8X4
+          Bc+SqGt9g7NfZgNk0Xgm2s6EfLqYOQ6lZVG+M9sAL6PRxrCvqW7NS6SSLUiYE8qW
+          N5W1l1DXmqkA3joep6QdX2F4FLqNMltsadRe7csxNZ8/50KjORZHU514lgWxU3yM
+          6I5c2giGb4cf05NUOEjfoyuBjFnpHCpKX96ioNyCtH+dHRx3yuZlgH4f3VjOHIOX
+          mwIDAQAB
+          -----END PUBLIC KEY-----
+          EOF
+          printf '%s' "$PROVIDER_KEY" | openssl pkeyutl -encrypt -pubin -inkey /tmp/openclaw_provider_pub.pem -out /tmp/openclaw_provider.enc
+          base64 -w0 /tmp/openclaw_provider.enc > /tmp/openclaw_provider.enc.b64
+          echo "Encrypted provider credential prepared."
+
+      - name: Upload encrypted payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-openclaw-provider
+          path: /tmp/openclaw_provider.enc.b64
+          retention-days: 1

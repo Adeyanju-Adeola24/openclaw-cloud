@@ -5,6 +5,9 @@ set -euo pipefail
 OPENCLAW_BIN="$HOME/nvm/current/bin/openclaw"
 STATE_DIR="$HOME/.openclaw"
 LOG_FILE="$STATE_DIR/logs/gateway.log"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_ASSET_DIR="$SCRIPT_DIR/../openclaw-workspace"
+WORKSPACE_DIR="$STATE_DIR/workspace"
 
 export PATH="$HOME/nvm/current/bin:$PATH"
 umask 077
@@ -73,6 +76,20 @@ if [[ ! -f "$STATE_DIR/openclaw.json" ]]; then
   fi
 
   "$OPENCLAW_BIN" onboard "${onboard_args[@]}"
+fi
+
+if [[ -d "$WORKSPACE_ASSET_DIR" ]]; then
+  mkdir -p "$WORKSPACE_DIR/skills/server"
+
+  if [[ ! -f "$WORKSPACE_DIR/AGENTS.md" ]]; then
+    install -m 600 "$WORKSPACE_ASSET_DIR/AGENTS.md" "$WORKSPACE_DIR/AGENTS.md"
+  fi
+
+  if [[ ! -f "$WORKSPACE_DIR/skills/server/SKILL.md" ]]; then
+    install -m 600 \
+      "$WORKSPACE_ASSET_DIR/skills/server/SKILL.md" \
+      "$WORKSPACE_DIR/skills/server/SKILL.md"
+  fi
 fi
 
 if [[ -n "${NVIDIA_API_KEY:-}" ]]; then

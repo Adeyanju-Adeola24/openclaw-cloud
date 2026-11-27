@@ -5,16 +5,14 @@ on:
 
 permissions:
   contents: read
-  secrets: write
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify NVIDIA credential and update Codespaces secret
+      - name: Verify NVIDIA credential
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
         run: |
           set -euo pipefail
@@ -28,11 +26,33 @@ jobs:
 
           echo "NVIDIA verification HTTP status: ${status}"
           if [[ "${status}" != "200" ]]; then
-            echo "NVIDIA verification failed; Codespaces secret was not changed." >&2
+            echo "NVIDIA verification failed; no secret payload was created." >&2
             exit 1
           fi
 
-          printf '%s' "${NVIDIA_API_KEY}" | gh secret set NVIDIA_API_KEY \
+      - name: Create encrypted Codespaces secret payload
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          key_id="$(gh api "repos/${GITHUB_REPOSITORY}/codespaces/secrets/public-key" --jq '.key_id')"
+          encrypted_value="$(printf '%s' "${NVIDIA_API_KEY}" | gh secret set NVIDIA_API_KEY \
             --app codespaces \
-            --repo "${GITHUB_REPOSITORY}"
-          echo "Codespaces NVIDIA secret updated successfully."
+            --repo "${GITHUB_REPOSITORY}" \
+            --no-store)"
+
+          jq -n \
+            --arg encrypted_value "${encrypted_value}" \
+            --arg key_id "${key_id}" \
+            '{encrypted_value: $encrypted_value, key_id: $key_id}' \
+            > nvidia-secret-payload.json
+
+      - name: Upload encrypted payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvidia-secret-payload
+          path: nvidia-secret-payload.json
+          retention-days: 1

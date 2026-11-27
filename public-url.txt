@@ -1,1 +1,1 @@
-(no quick-tunnel URL detected - check /home/runner/.openclaw/tunnel.log)
+https://adjust-accomplish-villa-clock.trycloudflare.com

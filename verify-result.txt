@@ -1,22 +1,21 @@
 OpenClaw cloud verification
-time: 2026-11-27T11:27:05Z
+time: 2026-11-27T13:20:01Z
 
 local /health      : HTTP 200  {"ok":true,"status":"live"}
 local dashboard    : HTTP 200  39218 bytes
-public /health     : HTTP 200  {"ok":true,"status":"live"}
-public dashboard   : HTTP 200
+public URL         : (not detected)
 
 websocket probe    :
   OK    /ws
 
 processes:
-  pid=2348 rss=1557252KB up=00:17 openclaw-gateway 
-  pid=2437 rss=112660KB up=00:09 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
-  pid=2398 rss=95804KB up=00:13 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
-  pid=2419 rss=88620KB up=00:12 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/infra/sqlite-readonly-location.worker.js
-  pid=2467 rss=40612KB up=00:07 cloudflared tunnel
-  pid=2511 rss=3680KB up=00:00 bash /home/runner/.openclaw/keepalive.sh
+  pid=2514 rss=1240112KB up=01:40 openclaw-gateway 
+  pid=2597 rss=112944KB up=01:34 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
+  pid=2562 rss=96120KB up=01:37 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
+  pid=2576 rss=88756KB up=01:36 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/infra/sqlite-readonly-location.worker.js
+  pid=2809 rss=34832KB up=00:00 cloudflared tunnel
+  pid=2799 rss=3704KB up=00:00 bash /home/runner/.openclaw/keepalive.sh
 
 memory:
                total        used        free      shared  buff/cache   available
-Mem:            15Gi       2.6Gi        11Gi        46Mi       2.2Gi        12Gi
+Mem:            15Gi       2.2Gi        11Gi        49Mi       2.2Gi        13Gi

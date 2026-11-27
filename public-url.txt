@@ -1,1 +1,1 @@
-(no quick-tunnel URL detected - check /home/runner/.openclaw/tunnel.log)
+https://anaheim-sharing-luis-myrtle.trycloudflare.com

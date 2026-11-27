@@ -11,12 +11,26 @@ umask 077
 mkdir -p "$STATE_DIR/logs"
 chmod go-w "$HOME/.cache" 2>/dev/null || true
 
-if [[ -n "${OPENCLAW_DASHBOARD_TOKEN:-}" ]]; then
-  touch "$STATE_DIR/.env"
-  chmod 600 "$STATE_DIR/.env"
-  if ! grep -q '^OPENCLAW_DASHBOARD_TOKEN=' "$STATE_DIR/.env"; then
-    printf 'OPENCLAW_DASHBOARD_TOKEN=%s\n' "$OPENCLAW_DASHBOARD_TOKEN" >> "$STATE_DIR/.env"
+persist_env_secret() {
+  local name="$1"
+  local value="$2"
+  local tmp
+
+  tmp="$(mktemp "$STATE_DIR/.env.tmp.XXXXXX")"
+  if [[ -f "$STATE_DIR/.env" ]]; then
+    grep -v "^${name}=" "$STATE_DIR/.env" > "$tmp" || true
   fi
+  printf '%s=%s\n' "$name" "$value" >> "$tmp"
+  chmod 600 "$tmp"
+  mv "$tmp" "$STATE_DIR/.env"
+}
+
+if [[ -n "${OPENCLAW_DASHBOARD_TOKEN:-}" ]]; then
+  persist_env_secret OPENCLAW_DASHBOARD_TOKEN "$OPENCLAW_DASHBOARD_TOKEN"
+fi
+
+if [[ -n "${TELEGRAM_BOT_TOKEN:-}" ]]; then
+  persist_env_secret TELEGRAM_BOT_TOKEN "$TELEGRAM_BOT_TOKEN"
 fi
 
 if [[ ! -x "$OPENCLAW_BIN" ]]; then

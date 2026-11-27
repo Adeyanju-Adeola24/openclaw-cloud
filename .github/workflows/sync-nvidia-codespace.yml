@@ -1,0 +1,38 @@
+name: Sync NVIDIA secret to Codespaces
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  secrets: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify NVIDIA credential and update Codespaces secret
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          response_file="$(mktemp)"
+          status="$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
+            https://integrate.api.nvidia.com/v1/chat/completions \
+            --header "Authorization: Bearer ${NVIDIA_API_KEY}" \
+            --header 'Content-Type: application/json' \
+            --data '{"model":"nvidia/nemotron-3-ultra-550b-a55b","messages":[{"role":"user","content":"Reply with exactly OK"}],"max_tokens":8}')"
+
+          echo "NVIDIA verification HTTP status: ${status}"
+          if [[ "${status}" != "200" ]]; then
+            echo "NVIDIA verification failed; Codespaces secret was not changed." >&2
+            exit 1
+          fi
+
+          printf '%s' "${NVIDIA_API_KEY}" | gh secret set NVIDIA_API_KEY \
+            --app codespaces \
+            --repo "${GITHUB_REPOSITORY}"
+          echo "Codespaces NVIDIA secret updated successfully."

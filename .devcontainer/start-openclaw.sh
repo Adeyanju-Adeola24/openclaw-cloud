@@ -39,6 +39,11 @@ if [[ ! -x "$OPENCLAW_BIN" ]]; then
   OPENCLAW_BIN="$HOME/nvm/current/bin/openclaw"
 fi
 
+if ! "$OPENCLAW_BIN" plugins inspect duckduckgo >/dev/null 2>&1; then
+  "$OPENCLAW_BIN" plugins install @openclaw/duckduckgo-plugin \
+    || echo "Warning: DuckDuckGo search plugin could not be installed." >&2
+fi
+
 if [[ ! -f "$STATE_DIR/openclaw.json" ]]; then
   if [[ -z "${NVIDIA_API_KEY:-}" ]]; then
     echo "NVIDIA_API_KEY is not available to this Codespace." >&2
@@ -68,6 +73,25 @@ if [[ ! -f "$STATE_DIR/openclaw.json" ]]; then
   fi
 
   "$OPENCLAW_BIN" onboard "${onboard_args[@]}"
+fi
+
+"$OPENCLAW_BIN" config set tools.web.search.enabled true --strict-json >/dev/null || true
+"$OPENCLAW_BIN" config set tools.web.search.provider '"duckduckgo"' --strict-json >/dev/null || true
+"$OPENCLAW_BIN" config set tools.web.search.maxResults 5 --strict-json >/dev/null || true
+"$OPENCLAW_BIN" config set plugins.entries.duckduckgo.config.webSearch.region '"ng-en"' --strict-json >/dev/null || true
+"$OPENCLAW_BIN" config set plugins.entries.duckduckgo.config.webSearch.safeSearch '"moderate"' --strict-json >/dev/null || true
+
+if [[ -n "${TELEGRAM_BOT_TOKEN:-}" ]]; then
+  "$OPENCLAW_BIN" config set channels.telegram.enabled true --strict-json >/dev/null || true
+  "$OPENCLAW_BIN" config set channels.telegram.dmPolicy '"pairing"' --strict-json >/dev/null || true
+  "$OPENCLAW_BIN" config set channels.telegram.botToken \
+    --ref-provider default --ref-source env --ref-id TELEGRAM_BOT_TOKEN >/dev/null || true
+
+  if ! "$OPENCLAW_BIN" config get bindings 2>/dev/null | grep -q '"telegram"'; then
+    "$OPENCLAW_BIN" config set bindings \
+      '[{"agentId":"main","match":{"channel":"telegram","accountId":"default"}}]' \
+      --strict-json >/dev/null || true
+  fi
 fi
 
 if curl -fsS --max-time 5 http://127.0.0.1:18789/health >/dev/null 2>&1; then

@@ -1,0 +1,11 @@
+{
+  "name": "OpenClaw on GitHub Codespaces",
+  "forwardPorts": [18789],
+  "portsAttributes": {
+    "18789": {
+      "label": "OpenClaw",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postStartCommand": "bash .devcontainer/start-openclaw.sh"
+}

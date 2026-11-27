@@ -1,22 +1,22 @@
 OpenClaw cloud verification
-time: 2026-11-27T06:46:27Z
+time: 2026-11-27T06:54:08Z
 
 local /health      : HTTP 200  {"ok":true,"status":"live"}
 local dashboard    : HTTP 200  39218 bytes
-public /health     : HTTP 000  
-public dashboard   : HTTP 000
+public /health     : HTTP 200  {"ok":true,"status":"live"}
+public dashboard   : HTTP 200
 
 websocket probe    :
   OK    /ws
 
 processes:
-  pid=2336 rss=1586128KB up=00:11 openclaw-gateway 
-  pid=2432 rss=115756KB up=00:05 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
-  pid=2385 rss=95980KB up=00:08 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
-  pid=2399 rss=88584KB up=00:07 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/infra/sqlite-readonly-location.worker.js
-  pid=2415 rss=39792KB up=00:06 cloudflared tunnel
-  pid=2496 rss=3652KB up=00:00 bash /home/runner/.openclaw/keepalive.sh
+  pid=2326 rss=1532184KB up=00:16 openclaw-gateway 
+  pid=2416 rss=113104KB up=00:10 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
+  pid=2375 rss=95784KB up=00:13 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/process/spawn-broker/worker.js
+  pid=2392 rss=88452KB up=00:12 /opt/hostedtoolcache/node/24.22.3/x64/bin/node /opt/hostedtoolcache/node/24.22.3/x64/lib/node_modules/openclaw/dist/infra/sqlite-readonly-location.worker.js
+  pid=2462 rss=40760KB up=00:06 cloudflared tunnel
+  pid=2492 rss=3624KB up=00:00 bash /home/runner/.openclaw/keepalive.sh
 
 memory:
                total        used        free      shared  buff/cache   available
-Mem:            15Gi       2.6Gi        11Gi        45Mi       2.2Gi        12Gi
+Mem:            15Gi       2.6Gi        11Gi        47Mi       2.2Gi        13Gi

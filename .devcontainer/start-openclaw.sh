@@ -9,6 +9,15 @@ LOG_FILE="$STATE_DIR/logs/gateway.log"
 export PATH="$HOME/nvm/current/bin:$PATH"
 umask 077
 mkdir -p "$STATE_DIR/logs"
+chmod go-w "$HOME/.cache" 2>/dev/null || true
+
+if [[ -n "${OPENCLAW_DASHBOARD_TOKEN:-}" ]]; then
+  touch "$STATE_DIR/.env"
+  chmod 600 "$STATE_DIR/.env"
+  if ! grep -q '^OPENCLAW_DASHBOARD_TOKEN=' "$STATE_DIR/.env"; then
+    printf 'OPENCLAW_DASHBOARD_TOKEN=%s\n' "$OPENCLAW_DASHBOARD_TOKEN" >> "$STATE_DIR/.env"
+  fi
+fi
 
 if [[ ! -x "$OPENCLAW_BIN" ]]; then
   curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh \
